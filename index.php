@@ -1,6 +1,5 @@
 <?php 
     $A = null;
-
     function ordenaEparticona ($p, $r) {
         global $A;
         $pivo = $A[$r];
@@ -29,12 +28,35 @@
         }
     }
 
-    //add outras funcoes com outros alg de ordenacao
+    function countingSort($tripulantes) {
+        $maior = $tripulantes[0]['log'];
+        for ($i = 0; $i < count($tripulantes); $i++) {
+            if($tripulantes[$i]['log'] > $maior) {
+                $maior = $tripulantes[$i]['log'];
+            }
+        }
+
+        $freq = [];
+        for ($i = 0; $i < $maior+1; $i++) {
+            $freq[$i] = [];
+        }
+
+        for ($i = 0; $i < count($tripulantes); $i++) {
+            array_push($freq[$tripulantes[$i]['log']], $tripulantes[$i]);
+        }
+
+        $resposta = [];
+        for ($x = 0; $x < count($freq); $x++) {
+            for ($y = 0; $y < count($freq[$x]); $y++) {
+                array_push($resposta, $freq[$x][$y]);
+            }
+        }
+        return $resposta;
+    }
 
     function carregaVetor () { 
         try {    
             ini_set('memory_limit', '3G'); 
-            global $A;
             
             $start_leitura = microtime(true);
             $tripulantes = json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', file_get_contents('logNaveSbornia.txt', true)), true);
@@ -110,34 +132,64 @@
                     $count_logs += count($t);
                     if ($count_logs >= 1000001) {
                         $count_logs -= count($t);
+                        $posicao_impostor = 1000001 - $count_logs;
+                        $posicao_impostor--;
                         
-                        // Quick Sort
-                        $A = $t;
-                        $start_quick_sort = microtime(true);
-                        quickSort(0, count($A)-1);
-                        $end_quick_sort = microtime(true);
-                        $execution_time_quick_sort = ($end_quick_sort - $start_quick_sort);
+                        echo '<p>Tempo para carregar o arquivo: ' . round($execution_time_carregar_arquivo, 3) . ' segundos;</p>';
+                        echo '<p>Tempo para separar os tripulantes por mês: ' . round($execution_time_separa_trip_mes, 3) . ' segundos;</p>';
+                        echo '<p>----------------------------------------------------------------------------------------------------------------------------------------</p>';
 
-                        //Aqui vai a chamada de outras funcoes com outros alg de ordenacao
-                        break;
+                        $resposta = array (
+                            'possiveis_impostores' => $t,
+                            'posicao_impostor' => $posicao_impostor 
+                        );
+                        return $resposta;
                     }
                 }
-
-                $impostor = 1000001 - $count_logs;
-                $impostor--;
-                echo '<p>Tempo para carregar o arquivo: ' . round($execution_time_carregar_arquivo, 3) . ' segundos;</p>';
-                echo '<p>Tempo para separar os tripulantes por mês: ' . round($execution_time_separa_trip_mes, 3) . ' segundos;</p>';
-                echo '<p>----------------------------------------------------------------------------------------------------------------------------------------</p>';
-                echo '<p>De acordo com o Quick Sort, o impostor é:</p>';
-                echo '<p>User: <b>' . $A[$impostor]['user'] . ';</b></p>';
-                echo '<p>Log: <b>' . $A[$impostor]['log'] . ';</b></p>';
-                echo '<p>Tempo para ordenação: ' . round($execution_time_quick_sort, 3) . ' segundos;</p>';
-                echo '<p>----------------------------------------------------------------------------------------------------------------------------------------</p>';
-                //Aqui vai a exibicao de outros alg de ordenacao
+                return null;
             }
         } catch (Exception $e) {
             echo 'Exceção capturada: ',  $e->getMessage(), "\n";
         }
     }
-    carregaVetor();
+
+    function index () {
+        try {
+            $possiveis_impostores = carregaVetor();
+            if ($possiveis_impostores['possiveis_impostores'][0] && $possiveis_impostores['posicao_impostor'] != null) {
+                // Counting Sort
+                $start_counting_sort = microtime(true);
+                $ordenadoPorCS = countingSort($possiveis_impostores['possiveis_impostores']);
+                $end_counting_sort = microtime(true);
+                $execution_time_counting_sort = ($end_counting_sort - $start_counting_sort);
+    
+                echo '<p>De acordo com o Counting Sort, o impostor é:</p>';
+                echo '<p>User: <b>' . $ordenadoPorCS[$possiveis_impostores['posicao_impostor']]['user'] . ';</b></p>';
+                echo '<p>Log: <b>' . $ordenadoPorCS[$possiveis_impostores['posicao_impostor']]['log'] . ';</b></p>';
+                echo '<p>Tempo para ordenação: ' . round($execution_time_counting_sort, 3) . ' segundos;</p>';
+                echo '<p>----------------------------------------------------------------------------------------------------------------------------------------</p>';
+
+                // Quick Sort
+                global $A;
+                $A = $possiveis_impostores['possiveis_impostores'];
+                $start_quick_sort = microtime(true);
+                quickSort(0, count($A)-1);
+                $end_quick_sort = microtime(true);
+                $execution_time_quick_sort = ($end_quick_sort - $start_quick_sort);
+
+                echo '<p>De acordo com o Quick Sort, o impostor é:</p>';
+                echo '<p>User: <b>' . $A[$possiveis_impostores['posicao_impostor']]['user'] . ';</b></p>';
+                echo '<p>Log: <b>' . $A[$possiveis_impostores['posicao_impostor']]['log'] . ';</b></p>';
+                echo '<p>Tempo para ordenação: ' . round($execution_time_quick_sort, 3) . ' segundos;</p>';
+                echo '<p>----------------------------------------------------------------------------------------------------------------------------------------</p>';
+                
+            } else {
+                echo 'Houve algum erro ao carregar os possíveis impostores.';
+            }
+        } catch (Exception $e) {
+            echo 'Exceção capturada: ',  $e->getMessage(), "\n";
+        }
+    }
+    
+    index();
 ?>
