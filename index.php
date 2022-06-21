@@ -28,7 +28,7 @@
         }
     }
 
-    function countingSort($tripulantes) {
+    function countingSort ($tripulantes) {
         $maior = $tripulantes[0]['log'];
         for ($i = 0; $i < count($tripulantes); $i++) {
             if($tripulantes[$i]['log'] > $maior) {
@@ -46,9 +46,9 @@
         }
 
         $resposta = [];
-        for ($x = 0; $x < count($freq); $x++) {
-            for ($y = 0; $y < count($freq[$x]); $y++) {
-                array_push($resposta, $freq[$x][$y]);
+        for ($i = 0; $i < count($freq); $i++) {
+            for ($j = 0; $j < count($freq[$i]); $j++) {
+                array_push($resposta, $freq[$i][$j]);
             }
         }
         return $resposta;
@@ -85,41 +85,41 @@
                         'log' => $t['log'],
                         'user' => $t['user']
                     );
-                    switch ($t['month']) {
-                        case 'January' :
+                    switch (strtolower($t['month'])) {
+                        case 'january' :
                             array_push($tripulanes_por_mes['January'], $temp);
                             break;
-                        case 'February' :
+                        case 'february' :
                             array_push($tripulanes_por_mes['February'], $temp);
                             break;
-                        case 'March' :
+                        case 'march' :
                             array_push($tripulanes_por_mes['March'], $temp);
                             break;
-                        case 'April' :
+                        case 'april' :
                             array_push($tripulanes_por_mes['April'], $temp);
                             break;
-                        case 'May' :
+                        case 'may' :
                             array_push($tripulanes_por_mes['May'], $temp);
                             break;
-                        case 'June' :
+                        case 'june' :
                             array_push($tripulanes_por_mes['June'], $temp);
                             break;
-                        case 'July' :
+                        case 'july' :
                             array_push($tripulanes_por_mes['July'], $temp);
                             break;
-                        case 'August' :
+                        case 'august' :
                             array_push($tripulanes_por_mes['August'], $temp);
                             break;
-                        case 'September' :
+                        case 'september' :
                             array_push($tripulanes_por_mes['September'], $temp);
                             break;
-                        case 'October' :
+                        case 'october' :
                             array_push($tripulanes_por_mes['October'], $temp);
                             break;
-                        case 'November' :
+                        case 'november' :
                             array_push($tripulanes_por_mes['November'], $temp);
                             break;
-                        case 'December' :
+                        case 'december' :
                             array_push($tripulanes_por_mes['December'], $temp);
                             break;
                     }
@@ -157,15 +157,17 @@
         try {
             $possiveis_impostores = carregaVetor();
             if ($possiveis_impostores['possiveis_impostores'][0] && $possiveis_impostores['posicao_impostor'] != null) {
+                $posicao_impostor = $possiveis_impostores['posicao_impostor'];
+
                 // Counting Sort
                 $start_counting_sort = microtime(true);
                 $ordenadoPorCS = countingSort($possiveis_impostores['possiveis_impostores']);
                 $end_counting_sort = microtime(true);
                 $execution_time_counting_sort = ($end_counting_sort - $start_counting_sort);
-    
+
                 echo '<p>De acordo com o Counting Sort, o impostor é:</p>';
-                echo '<p>User: <b>' . $ordenadoPorCS[$possiveis_impostores['posicao_impostor']]['user'] . ';</b></p>';
-                echo '<p>Log: <b>' . $ordenadoPorCS[$possiveis_impostores['posicao_impostor']]['log'] . ';</b></p>';
+                echo '<p>User: <b>' . $ordenadoPorCS[$posicao_impostor]['user'] . ';</b></p>';
+                echo '<p>Log: <b>' . $ordenadoPorCS[$posicao_impostor]['log'] . ';</b></p>';
                 echo '<p>Tempo para ordenação: ' . round($execution_time_counting_sort, 3) . ' segundos;</p>';
                 echo '<p>----------------------------------------------------------------------------------------------------------------------------------------</p>';
 
@@ -178,8 +180,8 @@
                 $execution_time_quick_sort = ($end_quick_sort - $start_quick_sort);
 
                 echo '<p>De acordo com o Quick Sort, o impostor é:</p>';
-                echo '<p>User: <b>' . $A[$possiveis_impostores['posicao_impostor']]['user'] . ';</b></p>';
-                echo '<p>Log: <b>' . $A[$possiveis_impostores['posicao_impostor']]['log'] . ';</b></p>';
+                echo '<p>User: <b>' . $A[$posicao_impostor]['user'] . ';</b></p>';
+                echo '<p>Log: <b>' . $A[$posicao_impostor]['log'] . ';</b></p>';
                 echo '<p>Tempo para ordenação: ' . round($execution_time_quick_sort, 3) . ' segundos;</p>';
                 echo '<p>----------------------------------------------------------------------------------------------------------------------------------------</p>';
                 
@@ -190,6 +192,5 @@
             echo 'Exceção capturada: ',  $e->getMessage(), "\n";
         }
     }
-    
     index();
 ?>
